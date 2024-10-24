@@ -1,0 +1,50 @@
+:root {
+    --tbldis-gen-font-family: "Helvetica Neue", "Arial", sans-serif;
+}
+
+tr.tbldis-gen {
+  border-collapse: collapse;
+}
+
+tr.tbldis-gen:nth-child(2n + 1) {
+  background-color: rgb(233, 233, 233);
+}
+
+tr.tbldis-gen:nth-child(2n) {
+  background-color: white;
+}
+
+th.tbldis-gen {
+  padding: 10pt;
+  font-weight: bold;
+}
+
+td.tbldis-gen {
+  padding: 12px;
+  font-size: 14px;
+  border: none;
+  /* font-family: "Helvetica Neue", "Arial", sans-serif; */
+}
+
+.tbldis-gen-holder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tbldis-gen-tooltop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #ffffca;
+  font-size: 12px;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", "Verdana", sans-serif;
+  padding: 4px 6px;
+}
+
+table.tbldis-gen {
+  width: 75%;
+  border: 1px solid gray;
+  font-family: var(--tbldis-gen-font-family);
+}
