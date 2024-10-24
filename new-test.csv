@@ -2,5 +2,5 @@ id,photo,name,color,count,date,score
 1,,Thomas,@color:#ff0,3,@pydate:10-21-2024,@base64:aGVsbG8=
 2,,Alice,@color:#0ff,10,@pydate:10-20-2024,@rand
 3,,"Bob, Charlie",@color:#271,5,@pydate:10-10-2024,@rand
-4,@img:https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Italian_garlic_PDO.JPG/1920px-Italian_garlic_PDO.JPG$$100,Garlic,@color:#109055,120,@pydate:10-23-2024,@rand
-5,@img:https://www.geekbench.com/img/rosedale/logo-light.svg,"Eve, even",@color:black,10,@pydate:10-1-2011,@rand
+4,@img:https://upload.wikimedia.org/wikipedia/commons/b/b2/Eduardbuchner.jpg$$100,Garlic,@color:#109055,120,@pydate:10-23-2024,@rand
+5,@img:https://upload.wikimedia.org/wikipedia/commons/8/89/PNG-Gradient.png,"Eve, even",@color:black,10,@pydate:10-1-2011,@rand

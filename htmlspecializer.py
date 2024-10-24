@@ -101,30 +101,6 @@ class ColorSpecializer(Specializer):
 
         return group.html()
 
-        # return """<div class="tbldis-gen-tooltop" hidden id='sub-{id}'>{raw_content}</div>
-        # </div>
-        # <div id={id} class="tbldis-gen-color-component" style="background-color: {color}; width: 45px;height: 45px">
-        # &nbsp;
-
-        # <script>
-        # p = document.getElementById('{id}');
-        # p.onmouseenter = (event) => {{
-        #     let q = document.getElementById('sub-{id}')
-        #     q.removeAttribute('hidden')
-        #     q.style.left = `${{event.x + 10}}px`
-        #     q.style.top = `${{event.y - 20}}px`
-        # }}
-        # p.onmouseleave = () => {{
-        #     let q = document.getElementById('sub-{id}')
-        #     q.setAttribute('hidden', true)
-        # }}
-        # </script>
-        # """.format(
-        #     id=u,
-        #     raw_content=self.extract_data(content),
-        #     color=self.extract_data(content),
-        # )
-
 
 class ImgSpecializer(Specializer):
     def __init__(self, keyword="img", indicator="@", delimiter=":"):
@@ -142,14 +118,13 @@ class ImgSpecializer(Specializer):
             url = data
             w, h = None, None
 
-        if w and h:
-            return """<img src="{}" width={} height={} />""".format(url, w, h)
+        attrs = {"src": url}
         if w:
-            return """<img src="{}" width={}  />""".format(url, w)
+            attrs["width"] = w
         if h:
-            return """<img src="{}" height={} />""".format(url, h)
+            attrs["height"] = h
 
-        return """<img src="{}" />""".format(url)
+        return Tag("img", content=[], self_closing=True, **attrs).html()
 
 
 class PyDateSpecializer(Specializer):
@@ -168,12 +143,15 @@ class RandomNumberSpecializer(Specializer):
 
     def raw_parse(self, data: str) -> str:
         u = uuid.uuid4()
-        return """
-        <div class="tbldis-gen" id='{id}'></div>
-        <script>
-            element = document.getElementById('{id}');
-            element.textContent = Math.random().toFixed(4);
-        </script>
-        """.format(
-            id=u
+        div = Tag("div", Class="tbldis-gen", id=f"{u}")
+        script = Tag(
+            "script",
+            content=[
+                TextNode(
+                    f"element = document.getElementById('{u}');\n"
+                    "element.textContent = Math.random().toFixed(4);"
+                )
+            ],
         )
+
+        return TagGroup(div, script).html()
