@@ -134,7 +134,6 @@ class PyDateSpecializer(Specializer):
         super().__init__(keyword, indicator, delimiter)
 
     def raw_parse(self, data: str) -> str:
-        month, day, year = (int(i) for i in data.split("-"))
         d = datetime.datetime.now()
         return d.strftime("%A, %B %d, %Y")
 

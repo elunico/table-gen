@@ -1,4 +1,3 @@
-import json
 import spllib
 
 # with open("support/valid-tags.json") as g:
