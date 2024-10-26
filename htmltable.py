@@ -2,6 +2,7 @@ from typing import Collection
 from htmlspecializer import Specializer
 from table import Table
 from tag import Tag, TextNode
+import html
 
 
 class TableHTMLMaker:
@@ -13,14 +14,14 @@ class TableHTMLMaker:
             else specializers
         )
 
-    def add_speciailization(self, specializer: Specializer):
-        self.specializers.append(specializer)
+    def add_speciailization(self, *specializers: Specializer):
+        self.specializers.extend(specializers)
 
     def get_special_html(self, content):
         for specializer in self.specializers:
             if specializer.matches(content):
                 return specializer.parse(content)
-        return content
+        return html.escape(content)
 
     def html(self):
         table = Tag("table", cellspacing="0", cellpadding="0", Class="tbldis-gen")

@@ -3,6 +3,7 @@ import uuid
 import datetime
 from tag import TagGroup, Tag, TextNode
 import locale
+import typing
 
 
 class Specializer(abc.ABC):
@@ -13,6 +14,7 @@ class Specializer(abc.ABC):
             ColorSpecializer(),
             PyDateSpecializer(),
             RandomNumberSpecializer(),
+            HTMLDataSpecializer(),
         ]
 
     def __init__(self, keyword: str, indicator="@", delimiter=":"):
@@ -128,12 +130,12 @@ class ImgSpecializer(Specializer):
 
 
 class PyDateSpecializer(Specializer):
-    def __init__(self, keyword: str = "pydate", indicator="@", delimiter=":"):
+    def __init__(self, keyword: str = "pydate", indicator="@", delimiter=""):
         super().__init__(keyword, indicator, delimiter)
 
     def raw_parse(self, data: str) -> str:
         month, day, year = (int(i) for i in data.split("-"))
-        d = datetime.date(year, month, day)
+        d = datetime.datetime.now()
         return d.strftime("%A, %B %d, %Y")
 
 
@@ -155,3 +157,20 @@ class RandomNumberSpecializer(Specializer):
         )
 
         return TagGroup(div, script).html()
+
+
+class HTMLDataSpecializer(Specializer):
+    def __init__(self, keyword: str = "html", indicator="@", delimiter=":"):
+        super().__init__(keyword, indicator, delimiter)
+
+    def raw_parse(self, data: str) -> str:
+        return data  # no html.escape()
+
+
+class SimpleSpecializer(Specializer):
+    def __init__(self, keyword: str, parser: typing.Callable[[str], str]):
+        super().__init__(keyword)
+        self.parser = parser
+
+    def raw_parse(self, data: str) -> str:
+        return self.parser(data)

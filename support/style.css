@@ -39,7 +39,7 @@ td.tbldis-gen {
   left: 0;
   background-color: #ffffca;
   font-size: 12px;
-  font-family: "Lucida Grande", "Lucida Sans Unicode", "Verdana", sans-serif;
+  font-family: "Monaco", "Lucida Console", "Consolas", monospace;
   padding: 4px 6px;
 }
 

@@ -1,7 +1,11 @@
 import json
+import spllib
 
-with open("support/valid-tags.json") as g:
-    valids = json.load(g)
+# with open("support/valid-tags.json") as g:
+# valids = json.load(g)
+
+with open("support/valid-tags.spl") as g:
+    valids = spllib.load(g)
 
 
 class Tag:
@@ -20,6 +24,8 @@ class Tag:
 
         for attr in kwargs:
             attr = attr.lower()
+            if attr.startswith("data-"):
+                continue  # valid on all tags no matter what comes after
             if (
                 attr not in valids
                 or valids[attr][0] != "*"
