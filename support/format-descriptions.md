@@ -78,3 +78,22 @@ The `@pydate` directive puts the text of the current date in 'ddd, MMMMMMM DD, Y
 ### Examples
 
 `@pydate`
+
+## `@select:` Directive
+
+### Format
+CSV cells that begin with `@select:` can then a sequence of 'valid options'. These are either (1) a single piece of text or (2) two pieces of text separated by an equal sign (=), where the first one is the value attribute of the &lt;option&gt; element and the second item after the equal sign is the text to appear on the webpage for the option.
+
+You can also include a `$$` deliminator which then allows you to specify a URL to a JavaScript file which can be used to include functionality with the select element.
+
+The formats that are allowed are:
+    `@select:optval1=choice1,choice2,choice3` Creates a select with 3 options whose values are the text that is displayed
+    `@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3` Creates a select with 3 options with different text and values
+    `@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3$$https://example.com/some-script.js` Creates a select with 3 options with different text and values and includes a script from the url `https://example.com/some-script.js` which will be loaded into the page immediately after the `<select>` element.
+
+### Render
+The `@select:` directive is rendered as a select element optionally with an invisible JavaScript file included
+
+### Examples
+
+See above in formats

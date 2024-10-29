@@ -1,8 +1,5 @@
 import spllib
 
-# with open("support/valid-tags.json") as g:
-# valids = json.load(g)
-
 with open("support/valid-tags.spl") as g:
     valids = spllib.load(g)
 

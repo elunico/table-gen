@@ -10,49 +10,6 @@ import base64
 from tag import Tag, TagGroup, TextNode
 
 
-class SelectElementSpecializer(Specializer):
-    def __init__(
-        self,
-        keyword: str = "select",
-        indicator="@",
-        delimiter=":",
-        support_srcs: list[str] | None = None,
-        support_scripts: list[str] | None = None,
-    ):
-        super().__init__(keyword, indicator, delimiter)
-        self.support_srcs: list[str] = support_srcs or list()
-        self.support_scripts: list[str] = support_scripts or list()
-
-    def raw_parse(self, data: str) -> str:
-        if "$$" in data:
-            data, src = data.split("$$")
-            self.support_srcs.append(src)
-
-        options = ((i, i) if "=" not in i else (i.split("=")) for i in data.split(";"))
-
-        i = uuid.uuid4()
-
-        div = Tag("div", id=f"{i}-holder", Class="tbldis-gen-select-holder")
-        select = Tag("select", id=f"{i}-select")
-        for value, text in options:
-            option = Tag("option", value=value, content=[TextNode(text)])
-            select.appendChild(option)
-
-        div.appendChild(select)
-
-        group = TagGroup(div)
-
-        if self.support_srcs:
-            for src in self.support_srcs:
-                group.appendChild(Tag("script", src=src))
-
-        if self.support_scripts:
-            for script in self.support_scripts:
-                group.appendChild(Tag("script", content=[TextNode(script)]))
-
-        return group.html()
-
-
 class Base64DataSpecializer(Specializer):
     def __init__(self, keyword: str = "base64", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
@@ -115,7 +72,6 @@ def main():
 
     htmler = TableHTMLMaker(f)
     htmler.add_speciailization(Base64DataSpecializer())
-    htmler.add_speciailization(SelectElementSpecializer())
 
     if args.partial:
         if args.output:
