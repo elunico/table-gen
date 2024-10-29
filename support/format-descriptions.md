@@ -22,11 +22,11 @@ The `@color:` directive is rendered as a small, square div with the background c
 CSV cells that begin with `@img:` can then specify a valid image url and, optionally, a width, a height or both for the image.
 The formats that are allowed are:
 
-    `@img:URL` to display an image with the src of URL at its default dimensions
+`@img:URL` to display an image with the src of URL at its default dimensions
 
-    `@img:URL$$W` to display an image with the src of URL at the given width W and an automatic height. The value for W should be in pixels
+`@img:URL$$W` to display an image with the src of URL at the given width W and an automatic height. The value for W should be in pixels
 
-    `@img:URL$$WxH` to display an image with the src of URL at the given width W and height H. The value for W and H should be in pixels
+`@img:URL$$WxH` to display an image with the src of URL at the given width W and height H. The value for W and H should be in pixels
 
 
 ### Render
@@ -92,11 +92,11 @@ You can also include a `$$` deliminator which then allows you to specify a URL t
 
 The formats that are allowed are:
 
-    `@select:optval1=choice1,choice2,choice3` Creates a select with 3 options whose values are the text that is displayed
+`@select:optval1=choice1,choice2,choice3` Creates a select with 3 options whose values are the text that is displayed
 
-    `@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3` Creates a select with 3 options with different text and values
+`@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3` Creates a select with 3 options with different text and values
 
-    `@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3$$https://example.com/some-script.js` Creates a select with 3 options with different text and values and includes a script from the url `https://example.com/some-script.js` which will be loaded into the page immediately after the `<select>` element.
+`@select:optval1=Option Choice 1,optval2=Option Choice 2,optval3=Option Choice 3$$https://example.com/some-script.js` Creates a select with 3 options with different text and values and includes a script from the url `https://example.com/some-script.js` which will be loaded into the page immediately after the `<select>` element.
 
 ### Render
 The `@select:` directive is rendered as a select element optionally with an invisible JavaScript file included
