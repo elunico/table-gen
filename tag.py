@@ -41,14 +41,14 @@ def _find_by_class(classname: str, root: "Tag") -> list["Tag"]:
 
 
 def _find_by_tag(tagname: str, root: "Tag") -> list["Tag"]:
-    def find_tag_impl(tagname: str, root: "Tag", list: list["Tag"]) -> list["Tag"]:
+    def find_tag_impl(tagname: str, root: "Tag", items: list["Tag"]) -> list["Tag"]:
         if root.name.lower() == tagname.lower():
-            list.append(root)
+            items.append(root)
 
         for child in root.children:
-            find_tag_impl(tagname, child, list)
+            find_tag_impl(tagname, child, items)
 
-        return list
+        return items
 
     return find_tag_impl(tagname, root, [])
 
@@ -68,9 +68,9 @@ class Tag:
         self.self_closing = self_closing
         self.attributes = kwargs
 
-        if 'Class' in self.attributes:
-            self.attributes['class'] = self.attributes['Class']
-            del self.attributes['Class']
+        if "Class" in self.attributes:
+            self.attributes["class"] = self.attributes["Class"]
+            del self.attributes["Class"]
 
         if not check_attrs:
             return
@@ -80,12 +80,20 @@ class Tag:
             check_valid_attr(attr, lname)
 
     def __str__(self):
-        return f'<{self.name} {' '.join(f"{k}={v}" for k, v in self.attributes.items())}{" /" if self.self_closing else ""}>{"..." if self.children else ""}{f'</{self.name}>' if not self.self_closing else ""}'
+        return f'{self.open_tag()}{"..." if self.children else ""}{self.close_tag()}'
 
     def __repr__(self) -> str:
         return str(self)
 
+    def pprint(self, indent=0):
+        print(" " * indent + self.open_tag())
+        for child in self.children:
+            child.pprint(indent + 4)
+        print(" " * indent + self.close_tag())
+
     def appendChild(self, child: "Tag"):
+        if not isinstance(child, Tag):
+            raise TypeError("child must be tag")
         self.children.append(child)
 
     def select(self, selector: str) -> list["Tag"]:
@@ -113,21 +121,22 @@ class Tag:
     def getAttribute(self, attr: str) -> str | None:
         return self.attributes.get(attr, None)
 
-    def html(self) -> str:
+    def open_tag(self) -> str:
         attrs = " ".join(
             '{}="{}"'.format(k.lower(), v) for (k, v) in self.attributes.items()
-        )
+        ).strip()
         if_self_closing = "/" if self.self_closing else ""
-        close_tag = "</{}>".format(self.name) if not self.self_closing else ""
-        children = "\n".join(i.html() for i in self.children)
+        name = self.name.lower()
 
-        return """<{name} {if_self_closing} {attrs}>{children}{close_tag}""".format(
-            name=self.name,
-            if_self_closing=if_self_closing,
-            close_tag=close_tag,
-            attrs=attrs,
-            children=children,
-        )
+        content = f"{name} {attrs} {if_self_closing}".strip()
+        return f"<{content}>"
+
+    def close_tag(self) -> str:
+        return "</{}>".format(self.name) if not self.self_closing else ""
+
+    def html(self) -> str:
+        children = "\n".join(i.html() for i in self.children)
+        return f"{self.open_tag()}{children}{self.close_tag()}"
 
 
 class TextNode(Tag):
@@ -137,6 +146,9 @@ class TextNode(Tag):
 
     def appendChild(self, child: "Tag"):
         raise TypeError("TextNode cannot have children")
+
+    def dom(self) -> Tag:
+        return self
 
     def html(self) -> str:
         return self.data

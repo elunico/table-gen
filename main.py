@@ -14,8 +14,8 @@ class Base64DataSpecializer(Specializer):
     def __init__(self, keyword: str = "base64", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data: str) -> str:
-        return str(base64.b64decode(data), encoding="utf-8")
+    def raw_parse(self, data: str) -> Tag:
+        return TextNode(str(base64.b64decode(data), encoding="utf-8"))
 
 
 def fill_template(content):
@@ -73,14 +73,16 @@ def main():
     htmler = TableHTMLMaker(f)
     htmler.add_speciailization(Base64DataSpecializer())
 
+    v = htmler.render()
+
     if args.partial:
         if args.output:
             with open(args.output + "-partial", "w") as g:
-                g.write(make_partial(htmler.html()))
+                g.write(make_partial(v.html()))
         else:
-            print(make_partial(htmler.html()))
+            print(make_partial(v.html()))
     else:
-        content = fill_template(htmler.html())
+        content = fill_template(v.html())
         if args.output:
             with open(args.output, "w") as g:
                 g.write(content)

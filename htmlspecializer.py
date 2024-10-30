@@ -43,12 +43,12 @@ class Specializer(abc.ABC):
         return content[len(self.prefix_string) :]
 
     @abc.abstractmethod
-    def raw_parse(self, data: str) -> str:
+    def raw_parse(self, data: str) -> Tag:
         """
         Parse the data exactly as given without attempting to extract the prefix
         """
 
-    def parse(self, content: str) -> str:
+    def parse(self, content: str) -> Tag:
         """
         Parse the argument in the CSV column, removing the prefix specialization indicator first
         """
@@ -59,10 +59,10 @@ class ColorSpecializer(Specializer):
     def __init__(self, keyword="color", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data):
+    def raw_parse(self, data: str) -> Tag:
         return self.parse(self.prefix_string + data)
 
-    def parse(self, content):
+    def parse(self, content: str) -> Tag:
         u = uuid.uuid4()
         data = self.extract_data(content)
 
@@ -102,14 +102,14 @@ class ColorSpecializer(Specializer):
 
         group = TagGroup(tooltip, main, script)
 
-        return group.html()
+        return group
 
 
 class ImgSpecializer(Specializer):
     def __init__(self, keyword="img", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data):
+    def raw_parse(self, data: str) -> Tag:
         if "$$" in data:
             url, dimensions = data.split("$$")
             if "x" in dimensions:
@@ -127,23 +127,23 @@ class ImgSpecializer(Specializer):
         if h:
             attrs["height"] = h
 
-        return Tag("img", children=[], self_closing=True, **attrs).html()
+        return Tag("img", children=[], self_closing=True, **attrs)
 
 
 class PyDateSpecializer(Specializer):
     def __init__(self, keyword: str = "pydate", indicator="@", delimiter=""):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data: str) -> str:
+    def raw_parse(self, data: str) -> Tag:
         d = datetime.datetime.now()
-        return d.strftime("%A, %B %d, %Y")
+        return TextNode(d.strftime("%A, %B %d, %Y"))
 
 
 class RandomNumberSpecializer(Specializer):
     def __init__(self, keyword: str = "rand", indicator="@", delimiter=""):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data: str) -> str:
+    def raw_parse(self, data: str) -> Tag:
         u = uuid.uuid4()
         div = Tag("div", Class="tbldis-gen", id=f"{u}")
         script = Tag(
@@ -156,15 +156,15 @@ class RandomNumberSpecializer(Specializer):
             ],
         )
 
-        return TagGroup(div, script).html()
+        return TagGroup(div, script)
 
 
 class HTMLDataSpecializer(Specializer):
     def __init__(self, keyword: str = "html", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
-    def raw_parse(self, data: str) -> str:
-        return data  # no html.escape()
+    def raw_parse(self, data: str) -> Tag:
+        return TextNode(data)  # no html.escape()
 
 
 class SelectElementSpecializer(Specializer):
@@ -180,7 +180,7 @@ class SelectElementSpecializer(Specializer):
         self.support_srcs: list[str] = support_srcs or list()
         self.support_scripts: list[str] = support_scripts or list()
 
-    def raw_parse(self, data: str) -> str:
+    def raw_parse(self, data: str) -> Tag:
         if "$$" in data:
             data, src = data.split("$$")
             self.support_srcs.append(src)
@@ -207,13 +207,13 @@ class SelectElementSpecializer(Specializer):
             for script in self.support_scripts:
                 group.appendChild(Tag("script", children=[TextNode(script)]))
 
-        return group.html()
+        return group
 
 
 class SimpleSpecializer(Specializer):
-    def __init__(self, keyword: str, parser: typing.Callable[[str], str]):
+    def __init__(self, keyword: str, parser: typing.Callable[[str], Tag]):
         super().__init__(keyword)
         self.parser = parser
 
-    def raw_parse(self, data: str) -> str:
+    def raw_parse(self, data: str) -> Tag:
         return self.parser(data)

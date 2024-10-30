@@ -17,13 +17,13 @@ class TableHTMLMaker:
     def add_speciailization(self, *specializers: Specializer):
         self.specializers.extend(specializers)
 
-    def get_special_html(self, content):
+    def get_special_html(self, content: str) -> Tag:
         for specializer in self.specializers:
             if specializer.matches(content):
                 return specializer.parse(content)
-        return html.escape(content)
+        return TextNode(html.escape(content))
 
-    def html(self):
+    def render(self):
         table = Tag("table", cellspacing="0", cellpadding="0", Class="tbldis-gen")
         thead = Tag("thead")
         tr = Tag("tr")
@@ -41,10 +41,11 @@ class TableHTMLMaker:
                 td = Tag(
                     "td",
                     Class="tbldis-gen",
-                    children=[TextNode(self.get_special_html(content))],
+                    children=[self.get_special_html(content)],
                 )
                 tr.appendChild(td)
             tbody.appendChild(tr)
 
         table.appendChild(tbody)
-        return table.html()
+
+        return table
