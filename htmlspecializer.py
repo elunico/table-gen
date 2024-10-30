@@ -68,14 +68,14 @@ class ColorSpecializer(Specializer):
 
         tooltip = Tag(
             "div",
-            content=[TextNode(data)],
+            children=[TextNode(data)],
             hidden="true",
             id=f"sub-{u}",
             Class="tbldis-gen-tooltop",
         )
         main = Tag(
             "div",
-            content=[TextNode("&nbsp;")],
+            children=[TextNode("&nbsp;")],
             id=str(u),
             Class="tbldis-gen-color-component",
             style=f"background-color: {data}; width: 45px; height: 45px",
@@ -127,7 +127,7 @@ class ImgSpecializer(Specializer):
         if h:
             attrs["height"] = h
 
-        return Tag("img", content=[], self_closing=True, **attrs).html()
+        return Tag("img", children=[], self_closing=True, **attrs).html()
 
 
 class PyDateSpecializer(Specializer):
@@ -148,7 +148,7 @@ class RandomNumberSpecializer(Specializer):
         div = Tag("div", Class="tbldis-gen", id=f"{u}")
         script = Tag(
             "script",
-            content=[
+            children=[
                 TextNode(
                     f"element = document.getElementById('{u}');\n"
                     "element.textContent = Math.random().toFixed(4);"
@@ -192,7 +192,7 @@ class SelectElementSpecializer(Specializer):
         div = Tag("div", id=f"{i}-holder", Class="tbldis-gen-select-holder")
         select = Tag("select", id=f"{i}-select")
         for value, text in options:
-            option = Tag("option", value=value, content=[TextNode(text)])
+            option = Tag("option", value=value, children=[TextNode(text)])
             select.appendChild(option)
 
         div.appendChild(select)
@@ -205,7 +205,7 @@ class SelectElementSpecializer(Specializer):
 
         if self.support_scripts:
             for script in self.support_scripts:
-                group.appendChild(Tag("script", content=[TextNode(script)]))
+                group.appendChild(Tag("script", children=[TextNode(script)]))
 
         return group.html()
 

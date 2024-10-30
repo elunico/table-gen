@@ -35,12 +35,12 @@ def make_partial(content):
     with open("support/style.css") as g:
         style = g.read()
 
-    style = Tag("style", content=[TextNode(style)])
+    style = Tag("style", children=[TextNode(style)])
     div = Tag(
         "div",
         id="tbldis-gen-holder",
         Class="tbldis-gen-holder",
-        content=[TextNode(content)],
+        children=[TextNode(content)],
     )
 
     return TagGroup(style, div).html()

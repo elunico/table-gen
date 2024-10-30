@@ -4,35 +4,114 @@ with open("support/valid-tags.spl") as g:
     valids = spllib.load(g)
 
 
+def check_valid_attr(attr: str, tag: str):
+    attr = attr.lower()
+    if attr.startswith("data-"):
+        return  # valid on all tags no matter what comes after
+    if attr not in valids:
+        raise ValueError(f"No such HTML attribute {attr!r}")
+    if valids[attr][0] != "*" and tag.lower() not in valids[attr]:
+        raise ValueError(f"The attribute {attr!r} is not valid for the tag <{tag}>")
+
+
+def _find_by_id(id: str, root: "Tag") -> "Tag | None":
+    if root.attributes.get("id", None) == id:
+        return root
+    else:
+        for child in root.children:
+            result = _find_by_id(id, child)
+            if result is not None:
+                return result
+        return None
+
+
+def _find_by_class(classname: str, root: "Tag") -> list["Tag"]:
+    def _find_by_class_impl(
+        classname: str, root: "Tag", items: list["Tag"]
+    ) -> list["Tag"]:
+        if root.attributes.get("class", None) == classname:
+            items.append(root)
+
+        for child in root.children:
+            _find_by_class_impl(classname, child, items)
+
+        return items
+
+    return _find_by_class_impl(classname, root, [])
+
+
+def _find_by_tag(tagname: str, root: "Tag") -> list["Tag"]:
+    def find_tag_impl(tagname: str, root: "Tag", list: list["Tag"]) -> list["Tag"]:
+        if root.name.lower() == tagname.lower():
+            list.append(root)
+
+        for child in root.children:
+            find_tag_impl(tagname, child, list)
+
+        return list
+
+    return find_tag_impl(tagname, root, [])
+
+
 class Tag:
     def __init__(
         self,
         name: str,
         *,
-        content: list["Tag"] | None = None,
+        children: list["Tag"] | None = None,
         self_closing: bool = False,
+        check_attrs: bool = True,
         **kwargs,
     ):
         self.name = name
-        self.content = content if content is not None else []
+        self.children = children if children is not None else []
         self.self_closing = self_closing
         self.attributes = kwargs
 
+        if 'Class' in self.attributes:
+            self.attributes['class'] = self.attributes['Class']
+            del self.attributes['Class']
+
+        if not check_attrs:
+            return
+
+        lname = self.name.lower()
         for attr in kwargs:
-            attr = attr.lower()
-            if attr.startswith("data-"):
-                continue  # valid on all tags no matter what comes after
-            if (
-                attr not in valids
-                or valids[attr][0] != "*"
-                and self.name.lower() not in valids[attr]
-            ):
-                raise ValueError(
-                    f"The attribute {attr!r} is not valid for the tag <{name}>"
-                )
+            check_valid_attr(attr, lname)
+
+    def __str__(self):
+        return f'<{self.name} {' '.join(f"{k}={v}" for k, v in self.attributes.items())}{" /" if self.self_closing else ""}>{"..." if self.children else ""}{f'</{self.name}>' if not self.self_closing else ""}'
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def appendChild(self, child: "Tag"):
-        self.content.append(child)
+        self.children.append(child)
+
+    def select(self, selector: str) -> list["Tag"]:
+        if selector[0] == "#":
+            return [] if (v := _find_by_id(selector[1:], self)) is None else [v]
+        if selector[0] == ".":
+            return _find_by_class(selector[1:], self)
+        if selector[0].isalpha():
+            return _find_by_tag(selector, self)
+
+        raise ValueError(f"Invalid selector {selector!r}")
+
+    def setAttribute(self, attr: str, value: str, check: bool = True):
+        if check:
+            check_valid_attr(attr, self.name.lower())
+
+        self.attributes[attr] = value
+
+    def removeAttribute(self, attr: str) -> bool:
+        if attr in self.attributes:
+            del self.attributes[attr]
+            return True
+        return False
+
+    def getAttribute(self, attr: str) -> str | None:
+        return self.attributes.get(attr, None)
 
     def html(self) -> str:
         attrs = " ".join(
@@ -40,21 +119,24 @@ class Tag:
         )
         if_self_closing = "/" if self.self_closing else ""
         close_tag = "</{}>".format(self.name) if not self.self_closing else ""
-        content = "\n".join(i.html() for i in self.content)
+        children = "\n".join(i.html() for i in self.children)
 
-        return """<{name} {if_self_closing} {attrs}>{content}{close_tag}""".format(
+        return """<{name} {if_self_closing} {attrs}>{children}{close_tag}""".format(
             name=self.name,
             if_self_closing=if_self_closing,
             close_tag=close_tag,
             attrs=attrs,
-            content=content,
+            children=children,
         )
 
 
 class TextNode(Tag):
     def __init__(self, data: str):
-        super().__init__("", content=[], self_closing=True)
+        super().__init__("", children=[], self_closing=True)
         self.data = data
+
+    def appendChild(self, child: "Tag"):
+        raise TypeError("TextNode cannot have children")
 
     def html(self) -> str:
         return self.data
@@ -62,7 +144,7 @@ class TextNode(Tag):
 
 class TagGroup(Tag):
     def __init__(self, *tags: Tag):
-        super().__init__("Invisible", content=list(tags), self_closing=True)
+        super().__init__("Invisible", children=list(tags), self_closing=True)
 
     def html(self) -> str:
-        return "\n".join(i.html() for i in self.content)
+        return "\n".join(i.html() for i in self.children)

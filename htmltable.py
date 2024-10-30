@@ -32,7 +32,7 @@ class TableHTMLMaker:
         table.appendChild(thead)
 
         for item in self.table.headers:
-            tr.appendChild(Tag("th", content=[TextNode(item)], Class="tbldis-gen"))
+            tr.appendChild(Tag("th", children=[TextNode(item)], Class="tbldis-gen"))
 
         tbody = Tag("tbody")
         for row in self.table.rows:
@@ -41,7 +41,7 @@ class TableHTMLMaker:
                 td = Tag(
                     "td",
                     Class="tbldis-gen",
-                    content=[TextNode(self.get_special_html(content))],
+                    children=[TextNode(self.get_special_html(content))],
                 )
                 tr.appendChild(td)
             tbody.appendChild(tr)
