@@ -2,17 +2,23 @@ import abc
 import uuid
 import datetime
 from tag import TagGroup, Tag, TextNode
-import locale
 import typing
 
 
 class Specializer(abc.ABC):
+    """
+    Accepts text data and returns a DOM tree rooted at a single Tag instance
+    which is a Python representation of the HTML which will be output into the
+    HTML table when using TableHTMLMaker
+    """
+
     @staticmethod
     def default_speciailizers() -> list["Specializer"]:
         return [
             ImgSpecializer(),
             ColorSpecializer(),
             PyDateSpecializer(),
+            JSDateSpecializer(),
             RandomNumberSpecializer(),
             HTMLDataSpecializer(),
             SelectElementSpecializer(),
@@ -50,35 +56,42 @@ class Specializer(abc.ABC):
 
     def parse(self, content: str) -> Tag:
         """
-        Parse the argument in the CSV column, removing the prefix specialization indicator first
+        Parse the argument in the CSV column, content is only the content after the prefix tag
         """
         return self.raw_parse(content[len(self.prefix_string) :])
 
 
 class ColorSpecializer(Specializer):
-    def __init__(self, keyword="color", indicator="@", delimiter=":"):
+    """
+    Accepts @color: tags and returns a blank div with that background color as well as a
+    tooltip that shows the color on mouse hover
+    """
+
+    def __init__(
+        self, keyword="color", indicator="@", delimiter=":", show_tooltip: bool = True
+    ):
         super().__init__(keyword, indicator, delimiter)
+        self.show_tooltip = show_tooltip
 
     def raw_parse(self, data: str) -> Tag:
         return self.parse(self.prefix_string + data)
 
-    def parse(self, content: str) -> Tag:
-        u = uuid.uuid4()
-        data = self.extract_data(content)
+    def render_main(self, uuid: uuid.UUID, data: str) -> Tag:
+        return Tag(
+            "div",
+            children=[TextNode("&nbsp;")],
+            id=str(uuid),
+            Class="tbldis-gen-color-component",
+            style=f"background-color: {data}; width: 45px; height: 45px",
+        )
 
+    def render_tooltip(self, uuid: uuid.UUID, data: str) -> Tag:
         tooltip = Tag(
             "div",
             children=[TextNode(data)],
             hidden="true",
-            id=f"sub-{u}",
+            id=f"sub-{uuid}",
             Class="tbldis-gen-tooltop",
-        )
-        main = Tag(
-            "div",
-            children=[TextNode("&nbsp;")],
-            id=str(u),
-            Class="tbldis-gen-color-component",
-            style=f"background-color: {data}; width: 45px; height: 45px",
         )
 
         script_content = """
@@ -94,18 +107,27 @@ class ColorSpecializer(Specializer):
             q.setAttribute('hidden', true)
         }}
         """.format(
-            id=str(u)
+            id=str(uuid)
         )
-
         script = Tag("script")
         script.appendChild(TextNode(script_content))
+        return Tag("span", children=[tooltip, script])
 
-        group = TagGroup(tooltip, main, script)
+    def parse(self, content: str) -> Tag:
+        u = uuid.uuid4()
+        data = self.extract_data(content)
 
-        return group
+        if not self.show_tooltip:
+            return TagGroup(self.render_main(u, data))
+        else:
+            return TagGroup(self.render_main(u, data), self.render_tooltip(u, data))
 
 
 class ImgSpecializer(Specializer):
+    """
+    @img: tag specializer. Puts an <img> element with the src given after the tag
+    """
+
     def __init__(self, keyword="img", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
@@ -131,6 +153,11 @@ class ImgSpecializer(Specializer):
 
 
 class PyDateSpecializer(Specializer):
+    """
+    Renders today in the table cell. Today being the day of render not the day of loading the webpage.
+    To get the date of the page load see JSDateSpecializer
+    """
+
     def __init__(self, keyword: str = "pydate", indicator="@", delimiter=""):
         super().__init__(keyword, indicator, delimiter)
 
@@ -139,7 +166,33 @@ class PyDateSpecializer(Specializer):
         return TextNode(d.strftime("%A, %B %d, %Y"))
 
 
+class JSDateSpecializer(Specializer):
+    """
+    Renders today in the table cell. Today being the day of the page load
+    """
+
+    def __init__(self, keyword: str = "jsdate", indicator="@", delimiter=""):
+        super().__init__(keyword, indicator, delimiter)
+
+    def raw_parse(self, data: str) -> Tag:
+        u = uuid.uuid4()
+        print(u)
+        div = Tag("div", id=f"{u}", Class="tbldis-gen")
+        s = Tag("script")
+
+        text = f"""
+        document.getElementById('{u}').textContent = (new Date()).toLocaleDateString();
+        """
+
+        s.appendChild(TextNode(text))
+        return TagGroup(div, s)
+
+
 class RandomNumberSpecializer(Specializer):
+    """
+    Puts a random number in the table cell on each load using JavaScript
+    """
+
     def __init__(self, keyword: str = "rand", indicator="@", delimiter=""):
         super().__init__(keyword, indicator, delimiter)
 
@@ -160,6 +213,10 @@ class RandomNumberSpecializer(Specializer):
 
 
 class HTMLDataSpecializer(Specializer):
+    """
+    Turns off santization so the CSV content is directly input into the table cell
+    """
+
     def __init__(self, keyword: str = "html", indicator="@", delimiter=":"):
         super().__init__(keyword, indicator, delimiter)
 
@@ -168,6 +225,11 @@ class HTMLDataSpecializer(Specializer):
 
 
 class SelectElementSpecializer(Specializer):
+    """
+    Creates a select element in the table cell with corresponding options.
+    Optionally accepting JavaScript sources to take action when the select is interacted with
+    """
+
     def __init__(
         self,
         keyword: str = "select",
@@ -211,6 +273,10 @@ class SelectElementSpecializer(Specializer):
 
 
 class SimpleSpecializer(Specializer):
+    """
+    Can be used for simple specializer use cases without having to create a new subclass
+    """
+
     def __init__(self, keyword: str, parser: typing.Callable[[str], Tag]):
         super().__init__(keyword)
         self.parser = parser

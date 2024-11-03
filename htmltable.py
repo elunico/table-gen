@@ -1,4 +1,3 @@
-from typing import Collection
 from htmlspecializer import Specializer
 from table import Table
 from tag import Tag, TextNode
@@ -6,6 +5,13 @@ import html
 
 
 class TableHTMLMaker:
+    """
+    Adapter class to turn a Table object into HTML for writing
+    Add speciailizations using Specializer before calling render to deal with special cases in the table
+    Call render() to get a root Tag representing the table. Ensure all Specializer instances are added before
+    calling render()
+    """
+
     def __init__(self, table: "Table", specializers: list[Specializer] | None = None):
         self.table = table
         self.specializers = (

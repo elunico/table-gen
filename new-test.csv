@@ -1,7 +1,7 @@
 id,photo,name,color,count,date,score
-1,,Thomas,@color:#ff0,3,@pydate,@base64:aGVsbG8=
-2,,Alice,@color:#0ff,10,@pydate,@rand
-3,@select:o1=option1;o2=option2;o3=option3$$/support/select-logger.js,"Bob, Charlie",@color:#271,5,@pydate,@rand
-4,@img:https://upload.wikimedia.org/wikipedia/commons/b/b2/Eduardbuchner.jpg$$100,Garlic,@color:#109055,120,@pydate,@rand
-5,@img:https://upload.wikimedia.org/wikipedia/commons/8/89/PNG-Gradient.png,"Eve, even",@color:black,10,@pydate,@rand
-6,@html:<iframe width='560' height='315' src='https://www.youtube.com/embed/ya3hZQgwHds?si=tBIcbO35698BUvRo' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' id='youtube-6' allowfullscreen></iframe><style>#youtube-6 { width: auto; height: auto; }</style>,YouTube,"@color:rgb(255, 51, 35)",@rand:10000,@pydate,@rand
+1,,Thomas,@color:#ff0,3,@jsdate,@base64:aGVsbG8=
+2,,Alice,@color:#0ff,10,@jsdate,@rand
+3,@select:o1=option1;o2=option2;o3=option3$$/support/select-logger.js,"Bob, Charlie",@color:#271,5,@jsdate,@rand
+4,@img:https://upload.wikimedia.org/wikipedia/commons/b/b2/Eduardbuchner.jpg$$100,Garlic,@color:#109055,120,@jsdate,@rand
+5,@img:https://upload.wikimedia.org/wikipedia/commons/8/89/PNG-Gradient.png,"Eve, even",@color:black,10,@jsdate,@rand
+6,@html:<iframe width='560' height='315' src='https://www.youtube.com/embed/ya3hZQgwHds?si=tBIcbO35698BUvRo' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' id='youtube-6' allowfullscreen></iframe><style>#youtube-6 { width: auto; height: auto; }</style>,YouTube,"@color:rgb(255, 51, 35)",@rand:10000,@jsdate,@rand

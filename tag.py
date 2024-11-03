@@ -1,4 +1,5 @@
 import spllib
+import weakref
 
 with open("support/valid-tags.spl") as g:
     valids = spllib.load(g)
@@ -25,12 +26,14 @@ def _find_by_id(id: str, root: "Tag") -> "Tag | None":
         return None
 
 
-def _find_by_class(classname: str, root: "Tag") -> list["Tag"]:
+def _find_by_class(classname: str, root: "Tag", limit: int = 0) -> list["Tag"]:
     def _find_by_class_impl(
         classname: str, root: "Tag", items: list["Tag"]
     ) -> list["Tag"]:
         if root.attributes.get("class", None) == classname:
             items.append(root)
+            if limit > 0 and len(items) == limit:
+                return items
 
         for child in root.children:
             _find_by_class_impl(classname, child, items)
@@ -40,10 +43,12 @@ def _find_by_class(classname: str, root: "Tag") -> list["Tag"]:
     return _find_by_class_impl(classname, root, [])
 
 
-def _find_by_tag(tagname: str, root: "Tag") -> list["Tag"]:
+def _find_by_tag(tagname: str, root: "Tag", limit: int = 0) -> list["Tag"]:
     def find_tag_impl(tagname: str, root: "Tag", items: list["Tag"]) -> list["Tag"]:
         if root.name.lower() == tagname.lower():
             items.append(root)
+            if limit > 0 and len(items) == limit:
+                return items
 
         for child in root.children:
             find_tag_impl(tagname, child, items)
@@ -67,6 +72,7 @@ class Tag:
         self.children = children if children is not None else []
         self.self_closing = self_closing
         self.attributes = kwargs
+        self.parent: weakref.ReferenceType[Tag] | None = None
 
         if "Class" in self.attributes:
             self.attributes["class"] = self.attributes["Class"]
@@ -95,8 +101,43 @@ class Tag:
         if not isinstance(child, Tag):
             raise TypeError("child must be tag")
         self.children.append(child)
+        child.parent = weakref.ref(self)
 
-    def select(self, selector: str) -> list["Tag"]:
+    def removeChild(self, child: "Tag") -> bool:
+        try:
+            self.children.remove(child)
+            return True
+        except ValueError:
+            return False
+
+    def _get_parent_index_offset(self, offset) -> "Tag | None":
+        try:
+            if self.parent is None:
+                return None
+            if (p := self.parent()) is None:
+                return None
+            idx = p.children.index(self)
+            return p.children[idx + offset]
+        except (ValueError, IndexError):
+            return None
+
+    def nextSibling(self) -> "Tag | None":
+        return self._get_parent_index_offset(1)
+
+    def previousSibling(self) -> "Tag | None":
+        return self._get_parent_index_offset(-1)
+
+    def select(self, selector: str) -> "Tag | None":
+        if selector[0] == "#":
+            return _find_by_id(selector[1:], self)
+        if selector[0] == ".":
+            return r[0] if (r := _find_by_class(selector[1:], self, limit=1)) else None
+        if selector[0].isalpha():
+            return r[0] if (r := _find_by_tag(selector, self, limit=1)) else None
+
+        raise ValueError(f"Invalid selector {selector!r}")
+
+    def select_all(self, selector: str) -> list["Tag"]:
         if selector[0] == "#":
             return [] if (v := _find_by_id(selector[1:], self)) is None else [v]
         if selector[0] == ".":

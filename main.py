@@ -73,16 +73,16 @@ def main():
     htmler = TableHTMLMaker(f)
     htmler.add_speciailization(Base64DataSpecializer())
 
-    v = htmler.render()
+    tree = htmler.render()
 
     if args.partial:
         if args.output:
             with open(args.output + "-partial", "w") as g:
-                g.write(make_partial(v.html()))
+                g.write(make_partial(tree.html()))
         else:
-            print(make_partial(v.html()))
+            print(make_partial(tree.html()))
     else:
-        content = fill_template(v.html())
+        content = fill_template(tree.html())
         if args.output:
             with open(args.output, "w") as g:
                 g.write(content)
