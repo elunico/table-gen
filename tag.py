@@ -1,5 +1,9 @@
+from os import replace
 import spllib
 import weakref
+import enum
+from pytomutil.dicts import ReplaceMode, key_merge, key_migrate
+import typing
 
 with open("support/valid-tags.spl") as g:
     valids = spllib.load(g)
@@ -74,9 +78,17 @@ class Tag:
         self.attributes = kwargs
         self.parent: weakref.ReferenceType[Tag] | None = None
 
-        if "Class" in self.attributes:
-            self.attributes["class"] = self.attributes["Class"]
-            del self.attributes["Class"]
+        key_merge(
+            self.attributes,
+            "clazz",
+            "klass",
+            "classname",
+            "Class",
+            target="class",
+            repl_mode=ReplaceMode.REPLACING,
+            deleting=True,
+            in_place=True,
+        )
 
         if not check_attrs:
             return

@@ -1,0 +1,37 @@
+%YAML 1.2
+---
+# SPL Synax file for Sublime Text 4
+# Put this file in your ~/Library/Application Support/Sublime Text/Packages/User/SPL.sublime-syntax
+# or equivalent User folder in the Packages folder of your Sublime Text installation to use
+# then use CMD+SHIFT+P and Set Syntax: SPL
+# See http://www.sublimetext.com/docs/syntax.html
+name: SPL
+file_extensions:
+  - spl
+scope: source.example-c
+contexts:
+  main:
+
+    # Comments begin with a '//' and finish at the end of the line
+    - match: '#'
+      scope: punctuation.definition.comment.example-c
+      push: line_comment
+
+    # Keywords are if, else for and while.
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '='
+      scope: keyword.control.example-c
+
+    - match: '\*'
+      scope: constant.language.c
+
+    - match: ',\s*'
+      scope: keyword.operator
+
+  line_comment:
+    - meta_scope: comment.line.example-c
+    - match: $
+      pop: true

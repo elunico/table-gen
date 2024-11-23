@@ -1,6 +1,7 @@
 # simple properties list format
 # see spllib.py file for more information
 # attributes and the tags they are valid for
+# taken from MDN
 # HTML 5 only
 # version: 2
 # date: 26-Oct-2024
