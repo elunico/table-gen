@@ -2,16 +2,22 @@
     --tbldis-gen-font-family: "Helvetica Neue", "Arial", sans-serif;
 }
 
+body {
+  background-color: rgb(245, 245, 247);
+}
+
 tr.tbldis-gen {
   border-collapse: collapse;
 }
 
-tr.tbldis-gen:nth-child(2n + 1) {
-  background-color: rgb(233, 233, 233);
+tr.tbldis-gen:nth-child(2n) {
+
+/*  background-color: rgb(245, 245, 247);*/
 }
 
-tr.tbldis-gen:nth-child(2n) {
+tr.tbldis-gen:nth-child(2n + 1) {
   background-color: white;
+background-color: rgb(225, 225, 229);
 }
 
 th.tbldis-gen {
